@@ -51,16 +51,10 @@
   button:hover { color:var(--fg); border-color:var(--acc); }
   .credit { font-size:11px; opacity:.8; max-width:340px; }
 
-  /* Minispiel */
-  #game { position:fixed; left:0; right:0; bottom:70px; height:30vh; z-index:2; }
-  #score { position:fixed; left:50%; bottom:30px; transform:translateX(-50%); font-size:14px; color:var(--dim); z-index:3; }
-  .t { position:absolute; font-size:44px; cursor:pointer; animation:pop .25s ease-out; transition:transform .1s; }
-  .t:hover { transform:scale(1.15); }
-  .t.hit { animation:gone .3s forwards; pointer-events:none; }
-  @keyframes pop { from { transform:scale(0); } }
-  @keyframes gone { to { transform:scale(1.8) rotate(25deg); opacity:0; } }
-  .float { position:absolute; font-weight:700; pointer-events:none; animation:up .8s forwards; }
-  @keyframes up { to { transform:translateY(-40px); opacity:0; } }
+  /* Schwebende Deko (GMod laesst im Ladebildschirm keine Klicks zu) */
+  #game { position:fixed; inset:0; pointer-events:none; overflow:hidden; }
+  .t { position:absolute; bottom:-60px; font-size:38px; opacity:.55; animation:rise linear forwards; }
+  @keyframes rise { to { transform:translateY(-115vh) rotate(25deg); opacity:0; } }
 </style>
 </head>
 <body>
@@ -69,7 +63,6 @@
 <div class="corner tl">MAP<br><strong id="map">wird geladen…</strong></div>
 <div class="corner tr">TEAM<br><strong>TubeYou</strong> <span class="acc">· Owner</span></div>
 <div class="corner bl">
-  <button id="mute">♪ Musik an</button><button id="next">🎲 Theme</button>
   <div class="credit" id="credit"></div>
 </div>
 <div class="corner br">twitch.tv/<strong>tube_y0u</strong></div>
@@ -85,7 +78,6 @@
   <div class="tip" id="tip"></div>
 </div>
 
-<div id="score"></div>
 <div id="game"></div>
 <audio id="music" loop></audio>
 
@@ -98,23 +90,23 @@ const MP3 = n => 'music/' + n + '.ogg';
 // Ein Theme = Farben (CSS) + Text + Musik + Spiel. Neues Theme: Eintrag hier + Klasse im CSS.
 const THEMES = {
   gruselig: { tracks:[['Magic Escape Room','magic-escape-room']], tag:'Die Traitor sind immer die anderen.',
-    goal:'Erwisch die Traitor', good:['🔪','🩸','💀'], bad:['😇'],
+    good:['🔪','🩸','💀'], bad:['😇'],
     tips:[['WAHRHEIT','Wer am lautesten "Ich bin Inno!" schreit, ist meistens Traitor.']] },
   lustig: { tracks:[['Fuzzball Parade','fuzzball-parade']], tag:'Heute stirbt jemand. Wahrscheinlich du.',
-    goal:'Hau den Jester (der will das so)', good:['🤡','🎈','🍌'], bad:['👮'],
+    good:['🤡','🎈','🍌'], bad:['👮'],
     tips:[['FUN FACT','Der Jester gewinnt, wenn du ihn tötest. Du hast es trotzdem getan, oder?']] },
   suess: { tracks:[['Vibing Over Venus','vibing-over-venus']], tag:'Kuschelig. Bis zum ersten Messer.',
-    goal:'Sammle Donuts 🍩', good:['🍩','🧁','🍪'], bad:['🥦'],
+    good:['🍩','🧁','🍪'], bad:['🥦'],
     tips:[['AWW','Auch Traitor brauchen Liebe. Aber vorher bitte identifizieren.']] },
   weltraum: { tracks:[['Space Jazz','space-jazz']], tag:'Im Weltraum hört dich niemand "RDM!" schreien.',
-    goal:'Schieß die Aliens ab', good:['👾','🛸','👽'], bad:['🧑‍🚀'],
+    good:['👾','🛸','👽'], bad:['🧑‍🚀'],
     tips:[['MISSION','Ein Detective ist auch nur ein Inno mit Hut.']] },
   mittelalter: { tracks:[['The Britons','the-britons']], tag:'Verrat, so alt wie die Krone selbst.',
-    goal:'Erschlage die Drachen', good:['🐉','🦇','🐺'], bad:['👑'],
+    good:['🐉','🦇','🐺'], bad:['👑'],
     tips:[['ERLASS','Wer den König erschlägt, wird gehängt. Oder gekickt.']] },
   weihnachten: { tracks:[['We Wish you a Merry Christmas','we-wish-you'],['Oh, Christmas Tree','oh-xmas'],['It Came Upon a Midnight Clear','midnight-clear']],
     tag:'Frohe Weihnachten. Einer von euch ist der Grinch.',
-    goal:'Schnapp dir die Geschenke', good:['🎁','⭐','🍪'], bad:['🎅'],
+    good:['🎁','⭐','🍪'], bad:['🎅'],
     tips:[['BESCHERUNG','Der Weihnachtsmann ist kein Traitor. Glaub ich.']] }
 };
 const BASE_TIPS = [
@@ -138,7 +130,6 @@ function applyTheme(name) {
   const playing = !music.paused;
   music.src = MP3(tr[1]);
   if (playing) music.play().catch(() => {});
-  resetGame();
   return name;
 }
 
@@ -151,45 +142,20 @@ function nextTip() {
   }, 600);
 }
 
-function setPlaying(on) {
-  on ? music.play().catch(() => {}) : music.pause();
-  $('mute').textContent = on ? '♪ Musik aus' : '♪ Musik an';
-}
-$('mute').onclick = () => setPlaying(music.paused);
-$('next').onclick = () => {
-  const keys = Object.keys(THEMES), cur = document.body.className;
-  applyTheme(keys[(keys.indexOf(cur) + 1) % keys.length]);
-};
+function setPlaying(on) { on ? music.play().catch(() => {}) : music.pause(); }
 
-// ---- Minispiel: Gute anklicken, Unschuldige NICHT (sonst RDM!) ----
-let score = 0, best = 0;
-try { best = +localStorage.getItem('ttt_best') || 0; } catch (e) {}
-function showScore() { $('score').textContent = `${theme.goal} · Punkte: ${score} · Rekord: ${best}`; }
-function resetGame() { score = 0; $('game').innerHTML = ''; showScore(); }
-function floatText(x, y, txt, color) {
-  const f = document.createElement('div');
-  f.className = 'float'; f.textContent = txt; f.style.cssText = `left:${x}px;top:${y}px;color:${color}`;
-  $('game').appendChild(f); setTimeout(() => f.remove(), 800);
-}
 function spawn() {
-  const g = $('game'), bad = Math.random() < 0.25;
-  const pool = bad ? theme.bad : theme.good;
+  const pool = theme.good.concat(theme.bad);
   const el = document.createElement('div');
   el.className = 't';
   el.textContent = pool[Math.floor(Math.random() * pool.length)];
-  const x = Math.random() * (g.clientWidth - 60), y = Math.random() * (g.clientHeight - 60);
-  el.style.left = x + 'px'; el.style.top = y + 'px';
-  el.onmousedown = () => {
-    if (bad) { score = Math.max(0, score - 3); floatText(x, y, 'RDM! -3', '#e33'); }
-    else { score++; floatText(x, y, '+1', 'var(--acc)'); }
-    if (score > best) { best = score; try { localStorage.setItem('ttt_best', best); } catch (e) {} }
-    el.classList.add('hit'); showScore();
-    setTimeout(() => el.remove(), 300);
-  };
-  g.appendChild(el);
-  setTimeout(() => el.remove(), 1600 - Math.min(800, score * 15)); // wird schneller
+  el.style.left = Math.random() * 96 + 'vw';
+  const dur = 9 + Math.random() * 7;
+  el.style.animationDuration = dur + 's';
+  $('game').appendChild(el);
+  setTimeout(() => el.remove(), dur * 1000);
 }
-setInterval(spawn, 750);
+setInterval(spawn, 1100);
 
 // ---- Callbacks, die Garry's Mod beim Laden aufruft ----
 let total = 0, needed = 0, real = false;
