@@ -92,26 +92,27 @@
 <script>
 const $ = id => document.getElementById(id);
 const music = $('music');
-const MP3 = n => 'https://incompetech.com/music/royalty-free/mp3-royaltyfree/' + encodeURIComponent(n) + '.mp3';
+// OGG statt MP3: laeuft auch im alten GMod-Browser
+const MP3 = n => 'music/' + n + '.ogg';
 
 // Ein Theme = Farben (CSS) + Text + Musik + Spiel. Neues Theme: Eintrag hier + Klasse im CSS.
 const THEMES = {
-  gruselig: { tracks:[['Magic Escape Room']], tag:'Die Traitor sind immer die anderen.',
+  gruselig: { tracks:[['Magic Escape Room','magic-escape-room']], tag:'Die Traitor sind immer die anderen.',
     goal:'Erwisch die Traitor', good:['🔪','🩸','💀'], bad:['😇'],
     tips:[['WAHRHEIT','Wer am lautesten "Ich bin Inno!" schreit, ist meistens Traitor.']] },
-  lustig: { tracks:[['Fuzzball Parade']], tag:'Heute stirbt jemand. Wahrscheinlich du.',
+  lustig: { tracks:[['Fuzzball Parade','fuzzball-parade']], tag:'Heute stirbt jemand. Wahrscheinlich du.',
     goal:'Hau den Jester (der will das so)', good:['🤡','🎈','🍌'], bad:['👮'],
     tips:[['FUN FACT','Der Jester gewinnt, wenn du ihn tötest. Du hast es trotzdem getan, oder?']] },
-  suess: { tracks:[['Vibing Over Venus']], tag:'Kuschelig. Bis zum ersten Messer.',
+  suess: { tracks:[['Vibing Over Venus','vibing-over-venus']], tag:'Kuschelig. Bis zum ersten Messer.',
     goal:'Sammle Donuts 🍩', good:['🍩','🧁','🍪'], bad:['🥦'],
     tips:[['AWW','Auch Traitor brauchen Liebe. Aber vorher bitte identifizieren.']] },
-  weltraum: { tracks:[['Space Jazz']], tag:'Im Weltraum hört dich niemand "RDM!" schreien.',
+  weltraum: { tracks:[['Space Jazz','space-jazz']], tag:'Im Weltraum hört dich niemand "RDM!" schreien.',
     goal:'Schieß die Aliens ab', good:['👾','🛸','👽'], bad:['🧑‍🚀'],
     tips:[['MISSION','Ein Detective ist auch nur ein Inno mit Hut.']] },
-  mittelalter: { tracks:[['The Britons']], tag:'Verrat, so alt wie die Krone selbst.',
+  mittelalter: { tracks:[['The Britons','the-britons']], tag:'Verrat, so alt wie die Krone selbst.',
     goal:'Erschlage die Drachen', good:['🐉','🦇','🐺'], bad:['👑'],
     tips:[['ERLASS','Wer den König erschlägt, wird gehängt. Oder gekickt.']] },
-  weihnachten: { tracks:[['We Wish you a Merry Christmas','We Wish You'],['Oh, Christmas Tree','Oh Xmas'],['It Came Upon a Midnight Clear']],
+  weihnachten: { tracks:[['We Wish you a Merry Christmas','we-wish-you'],['Oh, Christmas Tree','oh-xmas'],['It Came Upon a Midnight Clear','midnight-clear']],
     tag:'Frohe Weihnachten. Einer von euch ist der Grinch.',
     goal:'Schnapp dir die Geschenke', good:['🎁','⭐','🍪'], bad:['🎅'],
     tips:[['BESCHERUNG','Der Weihnachtsmann ist kein Traitor. Glaub ich.']] }
@@ -135,7 +136,7 @@ function applyTheme(name) {
   tips = [...BASE_TIPS, ...theme.tips];
   $('credit').textContent = `♪ "${tr[0]}" Kevin MacLeod (incompetech.com), CC BY 4.0`;
   const playing = !music.paused;
-  music.src = MP3(tr[1] || tr[0]);
+  music.src = MP3(tr[1]);
   if (playing) music.play().catch(() => {});
   resetGame();
   return name;
