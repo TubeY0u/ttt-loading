@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>TubeYou TTT2</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { height:100%; }
+  body { background:radial-gradient(ellipse at 50% 0%,#2a0c10,#0a0606 60%,#000); color:#d8d2c4;
+    font-family:"Segoe UI",Arial,sans-serif; overflow-x:hidden; }
+  .wrap { max-width:980px; margin:0 auto; padding:36px 32px 48px; }
+
+  header { text-align:center; margin-bottom:28px; }
+  .eyebrow { letter-spacing:.5em; font-size:12px; color:#6d675d; text-transform:uppercase; }
+  h1 { font-family:Impact,"Arial Black",sans-serif; font-weight:400; font-size:72px; letter-spacing:.04em;
+    line-height:1; margin:10px 0 6px; text-shadow:0 0 30px rgba(195,18,43,.35); animation:flicker 7s infinite; }
+  h1 span { color:#c3122b; }
+  @keyframes flicker { 0%,18%,22%,25%,53%,57%,100% {opacity:1} 20%,24%,55% {opacity:.3} }
+  .tag { font-style:italic; color:#8a8378; }
+
+  nav { display:flex; justify-content:center; gap:8px; margin-bottom:26px; flex-wrap:wrap; }
+  nav button { background:#140c0c; border:1px solid #3a2222; color:#a59e92; padding:10px 22px;
+    font:600 14px "Segoe UI",Arial,sans-serif; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; }
+  nav button:hover { color:#fff; border-color:#c3122b; }
+  nav button.on { background:#c3122b; border-color:#c3122b; color:#fff; }
+
+  section { display:none; animation:fade .3s; }
+  section.on { display:block; }
+  @keyframes fade { from { opacity:0; transform:translateY(6px); } }
+
+  h2 { font-size:13px; letter-spacing:.3em; color:#c3122b; text-transform:uppercase; margin:6px 0 14px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+  .card { background:rgba(20,12,12,.85); border:1px solid #2a1a1a; border-left:3px solid #c3122b; padding:16px 18px; }
+  .card b { display:block; color:#fff; font-size:16px; margin-bottom:5px; }
+  .card p { color:#a59e92; font-size:14px; line-height:1.5; }
+  .card.inno { border-left-color:#2ecc71; } .card.traitor { border-left-color:#c3122b; }
+  .card.det { border-left-color:#3498db; } .card.neutral { border-left-color:#c9a227; }
+  .card.jackal { border-left-color:#7ec8e3; } .card.serial { border-left-color:#8e44ad; }
+
+  ol.rules { list-style:none; counter-reset:r; }
+  ol.rules li { counter-increment:r; background:rgba(20,12,12,.85); border:1px solid #2a1a1a; padding:14px 18px 14px 62px;
+    margin-bottom:8px; position:relative; font-size:15px; line-height:1.5; }
+  ol.rules li::before { content:counter(r); position:absolute; left:18px; top:10px; font:28px Impact,sans-serif; color:#c3122b; }
+  ol.rules li small { display:block; color:#8a8378; font-size:13px; }
+
+  .keys { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px; }
+  .key { display:flex; align-items:center; gap:14px; background:rgba(20,12,12,.85); border:1px solid #2a1a1a; padding:12px 14px; }
+  kbd { min-width:44px; text-align:center; background:#1e1414; border:1px solid #4a2a2a; border-bottom-width:3px;
+    padding:6px 10px; font:700 14px Consolas,monospace; color:#fff; border-radius:4px; }
+  .key span { font-size:14px; color:#a59e92; }
+
+  footer { margin-top:30px; text-align:center; font-size:13px; color:#6d675d; }
+  footer strong { color:#d8d2c4; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Willkommen auf</div>
+    <h1>TUBE<span>YOU</span> TTT2</h1>
+    <div class="tag">Die Traitor sind immer die anderen.</div>
+  </header>
+
+  <nav>
+    <button data-tab="regeln" class="on">Regeln</button>
+    <button data-tab="rollen">Rollen</button>
+    <button data-tab="steuerung">Steuerung</button>
+    <button data-tab="team">Team</button>
+  </nav>
+
+  <section id="regeln" class="on">
+    <ol class="rules">
+      <li>Kein RDM.<small>Töte nur mit Grund: verdächtiges Verhalten, Traitor-Waffe gesehen, du wurdest angegriffen.</small></li>
+      <li>Tote schweigen.<small>Kein Ghosting über Discord oder andere Kanäle. Wer tot ist, verrät nichts.</small></li>
+      <li>Kein Teaming.<small>Unschuldige verbünden sich nicht heimlich mit Traitorn. Rollen werden gespielt, nicht abgesprochen.</small></li>
+      <li>Leichen identifizieren.<small>Mit E untersuchen, damit alle wissen, wer gestorben ist und welche Rolle er hatte.</small></li>
+      <li>Respekt im Chat und Voice.<small>Trashtalk ja, Beleidigungen nein. Kein Spam, kein Ohrenkrebs über das Mikro.</small></li>
+      <li>Admins haben das letzte Wort.<small>Probleme? Schreib im Chat <b>@</b> vor deine Nachricht, dann sehen es nur die Admins.</small></li>
+    </ol>
+  </section>
+
+  <section id="rollen">
+    <h2>Die Klassiker</h2>
+    <div class="grid">
+      <div class="card inno"><b>Innocent</b><p>Überlebe und finde die Traitor. Vertrau niemandem, der zu laut „Ich bin Inno!“ schreit.</p></div>
+      <div class="card det"><b>Detective</b><p>Ein Inno mit Hut und Shop. Untersucht Leichen, verteilt Werkzeuge, ist das erste Ziel der Traitor.</p></div>
+      <div class="card traitor"><b>Traitor</b><p>Töte alle Unschuldigen. Shop mit <kbd>C</kbd>, Traitor-Chat mit Teamtaste. Leise sein lohnt sich.</p></div>
+    </div>
+    <h2 style="margin-top:22px">Spezialrollen</h2>
+    <div class="grid">
+      <div class="card neutral"><b>Jester</b><p>Will getötet werden. Wer ihn tötet, lässt ihn gewinnen. Also: Finger weg, egal wie nervig er ist.</p></div>
+      <div class="card jackal"><b>Jackal &amp; Sidekick</b><p>Eigenes Team. Der Jackal macht mit seiner Waffe einen Spieler zum Sidekick, dann jagen sie zu zweit.</p></div>
+      <div class="card serial"><b>Serialkiller</b><p>Spielt gegen alle. Gewinnt nur, wenn am Ende niemand außer ihm steht.</p></div>
+      <div class="card traitor"><b>Necromancer</b><p>Holt Tote als Zombies zurück, die für ihn kämpfen. Leichen nie herumliegen lassen.</p></div>
+      <div class="card neutral"><b>Und noch mehr…</b><p>Priest, Marker, Shinigami, Drunk, Cursed und Co. Details zu deiner Rolle siehst du am Rundenstart.</p></div>
+    </div>
+  </section>
+
+  <section id="steuerung">
+    <div class="keys">
+      <div class="key"><kbd>F1</kbd><span>TTT2-Menü: Einstellungen, Rollen, HUD</span></div>
+      <div class="key"><kbd>C</kbd><span>Shop (Traitor, Detective &amp; Co.)</span></div>
+      <div class="key"><kbd>E</kbd><span>Leiche untersuchen</span></div>
+      <div class="key"><kbd>Q</kbd><span>Waffe fallen lassen</span></div>
+      <div class="key"><kbd>Tab</kbd><span>Scoreboard, Spieler markieren</span></div>
+      <div class="key"><kbd>!menu</kbd><span>Im Chat: Admin-Menü (nur Admins)</span></div>
+      <div class="key"><kbd>@</kbd><span>Vor Chatnachricht: geht direkt an die Admins</span></div>
+    </div>
+  </section>
+
+  <section id="team">
+    <div class="grid">
+      <div class="card traitor"><b>TubeYou</b><p>Owner. Baut den Server, sitzt im Discord und ist in jeder zweiten Runde verdächtig.</p></div>
+    </div>
+    <h2 style="margin-top:22px">Live dabei</h2>
+    <div class="grid">
+      <div class="card"><b>twitch.tv/tube_y0u</b><p>Hier laufen die TTT-Abende manchmal live. Vorbeischauen, Follow da lassen, im Chat sagen, wer der Traitor ist.</p></div>
+    </div>
+  </section>
+
+  <footer>Viel Spaß und gute Jagd. <strong>Schließen</strong> mit dem Knopf unten.</footer>
+</div>
+
+<script>
+var buttons = document.querySelectorAll('nav button');
+for (var i = 0; i < buttons.length; i++) {
+  buttons[i].onclick = function () {
+    for (var j = 0; j < buttons.length; j++) buttons[j].className = '';
+    var secs = document.querySelectorAll('section');
+    for (var k = 0; k < secs.length; k++) secs[k].className = '';
+    this.className = 'on';
+    document.getElementById(this.getAttribute('data-tab')).className = 'on';
+  };
+}
+</script>
+</body>
+</html>
