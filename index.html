@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>TubeYou TTT2</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { height:100%; overflow:hidden; user-select:none; }
+  body { background:var(--bg); color:var(--fg); font-family:var(--font); transition:background .5s; }
+
+  /* Themes: nur Variablen */
+  body.gruselig    { --bg:radial-gradient(ellipse at 50% 40%,#1a0a0c,#070505 55%,#000); --fg:#d8d2c4; --dim:#6d675d; --acc:#c3122b; --font:"Segoe UI",Arial,sans-serif; --title:Impact,"Arial Black",sans-serif; }
+  body.lustig      { --bg:repeating-linear-gradient(45deg,#ffd23f 0 40px,#ffc300 40px 80px); --fg:#2b1a00; --dim:#6b4a00; --acc:#e4005b; --font:"Comic Sans MS","Segoe UI",sans-serif; --title:"Comic Sans MS",Impact,sans-serif; }
+  body.suess       { --bg:linear-gradient(160deg,#ffe3f1,#fff5e6 60%,#e6f4ff); --fg:#5a3550; --dim:#b18aa6; --acc:#ff6fae; --font:"Segoe UI",Arial,sans-serif; --title:"Segoe UI Black","Arial Rounded MT Bold",sans-serif; }
+  body.weltraum    { --bg:radial-gradient(ellipse at 70% 20%,#2b1559,#0b0820 50%,#03020a); --fg:#e3dcff; --dim:#8a80b8; --acc:#41f2ff; --font:Consolas,"Segoe UI",monospace; --title:"Segoe UI Black",Arial,sans-serif; }
+  body.weihnachten { --bg:radial-gradient(ellipse at 50% 30%,#14402a,#0a2416 60%,#04120a); --fg:#f4efe6; --dim:#9fb8a6; --acc:#e0303a; --font:"Segoe UI",Arial,sans-serif; --title:"Segoe UI Black",Arial,sans-serif; }
+  body.mittelalter { --bg:radial-gradient(ellipse,#e9d8b0,#c9ab72 70%,#7a5a2c); --fg:#3a2510; --dim:#7a5a33; --acc:#8b1a1a; --font:Georgia,serif; --title:"Old English Text MT",Georgia,serif; }
+
+  /* Deko je Theme */
+  .deco { position:fixed; inset:0; pointer-events:none; }
+  .gruselig .deco { background:radial-gradient(circle at 20% 70%,#3a2a2a55,transparent 35%),radial-gradient(circle at 80% 30%,#2a1a1a55,transparent 30%); filter:blur(30px); animation:drift 30s ease-in-out infinite alternate; }
+  .weltraum .deco { background-image:radial-gradient(1px 1px at 10% 20%,#fff,transparent),radial-gradient(1px 1px at 30% 80%,#fff,transparent),radial-gradient(2px 2px at 60% 40%,#fff,transparent),radial-gradient(1px 1px at 85% 65%,#fff,transparent),radial-gradient(1px 1px at 45% 15%,#fff,transparent),radial-gradient(2px 2px at 75% 90%,#fff,transparent); background-size:300px 300px; animation:drift 60s linear infinite; }
+  .weihnachten .deco { background-image:radial-gradient(3px 3px at 10% 10%,#fff,transparent),radial-gradient(2px 2px at 40% 30%,#fff,transparent),radial-gradient(3px 3px at 70% 5%,#fff,transparent),radial-gradient(2px 2px at 90% 45%,#fff,transparent),radial-gradient(2px 2px at 25% 60%,#fff,transparent); background-size:260px 260px; animation:snow 12s linear infinite; }
+  .weihnachten h1 span { text-shadow:0 0 18px #e0303a88; }
+  @keyframes snow { to { background-position:40px 260px; } }
+  @keyframes drift { to { transform:translate(5%,-5%); } }
+
+  .center { position:fixed; left:50%; top:42%; transform:translate(-50%,-50%); text-align:center; width:min(720px,90vw); pointer-events:none; }
+  .eyebrow { letter-spacing:.5em; font-size:13px; color:var(--dim); text-transform:uppercase; }
+  h1 { font-family:var(--title); font-weight:400; font-size:clamp(56px,9vw,120px); line-height:.95; margin:14px 0 6px; letter-spacing:.04em; }
+  h1 span { color:var(--acc); }
+  .gruselig h1 { text-shadow:0 0 30px #c3122b55; animation:flicker 6s infinite; }
+  .weltraum h1 { text-shadow:0 0 20px #41f2ff88; }
+  .lustig h1 { transform:rotate(-3deg); text-shadow:4px 4px 0 #fff; }
+  @keyframes flicker { 0%,18%,22%,25%,53%,57%,100% {opacity:1} 20%,24%,55% {opacity:.25} }
+  .tag { font-style:italic; color:var(--dim); font-size:17px; }
+
+  .load { margin:40px auto 0; max-width:520px; }
+  .bar { height:5px; background:#0002; border-radius:3px; overflow:hidden; }
+  .fill { height:100%; width:0; background:var(--acc); box-shadow:0 0 12px var(--acc); transition:width .4s; }
+  .status { display:flex; justify-content:space-between; gap:16px; margin-top:10px; font:13px Consolas,monospace; color:var(--dim); }
+  #file { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
+  .tip { margin-top:36px; min-height:52px; font-size:18px; transition:opacity .6s; }
+  .tip b { color:var(--acc); letter-spacing:.15em; font-size:12px; display:block; margin-bottom:6px; }
+
+  .corner { position:fixed; font-size:13px; color:var(--dim); line-height:1.7; z-index:3; }
+  .corner strong { color:var(--fg); }
+  .tl{top:28px;left:32px} .tr{top:28px;right:32px;text-align:right} .bl{bottom:24px;left:32px} .br{bottom:24px;right:32px;text-align:right}
+  .acc { color:var(--acc); }
+  button { background:none; border:1px solid var(--dim); color:var(--dim); padding:5px 11px; font:inherit; cursor:pointer; margin-right:6px; }
+  button:hover { color:var(--fg); border-color:var(--acc); }
+  .credit { font-size:11px; opacity:.8; max-width:340px; }
+
+  /* Minispiel */
+  #game { position:fixed; left:0; right:0; bottom:70px; height:30vh; z-index:2; }
+  #score { position:fixed; left:50%; bottom:30px; transform:translateX(-50%); font-size:14px; color:var(--dim); z-index:3; }
+  .t { position:absolute; font-size:44px; cursor:pointer; animation:pop .25s ease-out; transition:transform .1s; }
+  .t:hover { transform:scale(1.15); }
+  .t.hit { animation:gone .3s forwards; pointer-events:none; }
+  @keyframes pop { from { transform:scale(0); } }
+  @keyframes gone { to { transform:scale(1.8) rotate(25deg); opacity:0; } }
+  .float { position:absolute; font-weight:700; pointer-events:none; animation:up .8s forwards; }
+  @keyframes up { to { transform:translateY(-40px); opacity:0; } }
+</style>
+</head>
+<body>
+<div class="deco"></div>
+
+<div class="corner tl">MAP<br><strong id="map">wird geladen…</strong></div>
+<div class="corner tr">TEAM<br><strong>TubeYou</strong> <span class="acc">· Owner</span></div>
+<div class="corner bl">
+  <button id="mute">♪ Musik an</button><button id="next">🎲 Theme</button>
+  <div class="credit" id="credit"></div>
+</div>
+<div class="corner br">twitch.tv/<strong>tube_y0u</strong></div>
+
+<div class="center">
+  <div class="eyebrow">Trouble in Terrorist Town 2</div>
+  <h1>TUBE<span>YOU</span></h1>
+  <div class="tag" id="tagline"></div>
+  <div class="load">
+    <div class="bar"><div class="fill" id="fill"></div></div>
+    <div class="status"><span id="file">Verbinde…</span><span id="count"></span></div>
+  </div>
+  <div class="tip" id="tip"></div>
+</div>
+
+<div id="score"></div>
+<div id="game"></div>
+<audio id="music" loop></audio>
+
+<script>
+const $ = id => document.getElementById(id);
+const music = $('music');
+const MP3 = n => 'https://incompetech.com/music/royalty-free/mp3-royaltyfree/' + encodeURIComponent(n) + '.mp3';
+
+// Ein Theme = Farben (CSS) + Text + Musik + Spiel. Neues Theme: Eintrag hier + Klasse im CSS.
+const THEMES = {
+  gruselig: { tracks:[['Magic Escape Room']], tag:'Die Traitor sind immer die anderen.',
+    goal:'Erwisch die Traitor', good:['🔪','🩸','💀'], bad:['😇'],
+    tips:[['WAHRHEIT','Wer am lautesten "Ich bin Inno!" schreit, ist meistens Traitor.']] },
+  lustig: { tracks:[['Fuzzball Parade']], tag:'Heute stirbt jemand. Wahrscheinlich du.',
+    goal:'Hau den Jester (der will das so)', good:['🤡','🎈','🍌'], bad:['👮'],
+    tips:[['FUN FACT','Der Jester gewinnt, wenn du ihn tötest. Du hast es trotzdem getan, oder?']] },
+  suess: { tracks:[['Vibing Over Venus']], tag:'Kuschelig. Bis zum ersten Messer.',
+    goal:'Sammle Donuts 🍩', good:['🍩','🧁','🍪'], bad:['🥦'],
+    tips:[['AWW','Auch Traitor brauchen Liebe. Aber vorher bitte identifizieren.']] },
+  weltraum: { tracks:[['Space Jazz']], tag:'Im Weltraum hört dich niemand "RDM!" schreien.',
+    goal:'Schieß die Aliens ab', good:['👾','🛸','👽'], bad:['🧑‍🚀'],
+    tips:[['MISSION','Ein Detective ist auch nur ein Inno mit Hut.']] },
+  mittelalter: { tracks:[['The Britons']], tag:'Verrat, so alt wie die Krone selbst.',
+    goal:'Erschlage die Drachen', good:['🐉','🦇','🐺'], bad:['👑'],
+    tips:[['ERLASS','Wer den König erschlägt, wird gehängt. Oder gekickt.']] },
+  weihnachten: { tracks:[['We Wish you a Merry Christmas','We Wish You'],['Oh, Christmas Tree','Oh Xmas'],['It Came Upon a Midnight Clear']],
+    tag:'Frohe Weihnachten. Einer von euch ist der Grinch.',
+    goal:'Schnapp dir die Geschenke', good:['🎁','⭐','🍪'], bad:['🎅'],
+    tips:[['BESCHERUNG','Der Weihnachtsmann ist kein Traitor. Glaub ich.']] }
+};
+const BASE_TIPS = [
+  ['REGEL','Kein RDM. Wer grundlos Unschuldige tötet, verliert Karma und Schaden.'],
+  ['TIPP','F1 öffnet das TTT2-Menü. Dort findest du Rollen und Einstellungen.'],
+  ['TIPP','Leichen identifizieren mit E. Tote reden nicht, ihre Leichen schon.'],
+  ['REGEL','Tote schweigen. Kein Ghosting über Discord.']
+];
+
+let theme, tips = [], t = 0;
+function applyTheme(name) {
+  const keys = Object.keys(THEMES);
+  if (!THEMES[name] && new Date().getMonth() === 11 && Math.random() < 0.5) name = 'weihnachten';
+  name = THEMES[name] ? name : keys[Math.floor(Math.random() * keys.length)];
+  theme = THEMES[name];
+  const tr = theme.tracks[Math.floor(Math.random() * theme.tracks.length)];
+  document.body.className = name;
+  $('tagline').textContent = theme.tag;
+  tips = [...BASE_TIPS, ...theme.tips];
+  $('credit').textContent = `♪ "${tr[0]}" Kevin MacLeod (incompetech.com), CC BY 4.0`;
+  const playing = !music.paused;
+  music.src = MP3(tr[1] || tr[0]);
+  if (playing) music.play().catch(() => {});
+  resetGame();
+  return name;
+}
+
+function nextTip() {
+  $('tip').style.opacity = 0;
+  setTimeout(() => {
+    const [k, v] = tips[t++ % tips.length];
+    $('tip').innerHTML = `<b>${k}</b>${v}`;
+    $('tip').style.opacity = 1;
+  }, 600);
+}
+
+function setPlaying(on) {
+  on ? music.play().catch(() => {}) : music.pause();
+  $('mute').textContent = on ? '♪ Musik aus' : '♪ Musik an';
+}
+$('mute').onclick = () => setPlaying(music.paused);
+$('next').onclick = () => {
+  const keys = Object.keys(THEMES), cur = document.body.className;
+  applyTheme(keys[(keys.indexOf(cur) + 1) % keys.length]);
+};
+
+// ---- Minispiel: Gute anklicken, Unschuldige NICHT (sonst RDM!) ----
+let score = 0, best = 0;
+try { best = +localStorage.getItem('ttt_best') || 0; } catch (e) {}
+function showScore() { $('score').textContent = `${theme.goal} · Punkte: ${score} · Rekord: ${best}`; }
+function resetGame() { score = 0; $('game').innerHTML = ''; showScore(); }
+function floatText(x, y, txt, color) {
+  const f = document.createElement('div');
+  f.className = 'float'; f.textContent = txt; f.style.cssText = `left:${x}px;top:${y}px;color:${color}`;
+  $('game').appendChild(f); setTimeout(() => f.remove(), 800);
+}
+function spawn() {
+  const g = $('game'), bad = Math.random() < 0.25;
+  const pool = bad ? theme.bad : theme.good;
+  const el = document.createElement('div');
+  el.className = 't';
+  el.textContent = pool[Math.floor(Math.random() * pool.length)];
+  const x = Math.random() * (g.clientWidth - 60), y = Math.random() * (g.clientHeight - 60);
+  el.style.left = x + 'px'; el.style.top = y + 'px';
+  el.onmousedown = () => {
+    if (bad) { score = Math.max(0, score - 3); floatText(x, y, 'RDM! -3', '#e33'); }
+    else { score++; floatText(x, y, '+1', 'var(--acc)'); }
+    if (score > best) { best = score; try { localStorage.setItem('ttt_best', best); } catch (e) {} }
+    el.classList.add('hit'); showScore();
+    setTimeout(() => el.remove(), 300);
+  };
+  g.appendChild(el);
+  setTimeout(() => el.remove(), 1600 - Math.min(800, score * 15)); // wird schneller
+}
+setInterval(spawn, 750);
+
+// ---- Callbacks, die Garry's Mod beim Laden aufruft ----
+let total = 0, needed = 0, real = false;
+function progress() {
+  if (!total) return;
+  const done = total - needed;
+  $('fill').style.width = Math.min(100, done / total * 100) + '%';
+  $('count').textContent = `${done} / ${total}`;
+}
+function details(servername, serverurl, mapname, maxplayers, steamid, gamemode, volume) {
+  $('map').textContent = mapname;
+  music.volume = Math.max(0, Math.min(1, volume ?? 0.5)) * 0.5;
+  setPlaying(true);
+}
+window.GameDetails = (...a) => { real = true; details(...a); };
+window.SetFilesTotal  = n => { total = n; progress(); };
+window.SetFilesNeeded = n => { needed = n; progress(); };
+window.DownloadingFile = f => { $('file').textContent = f.split('/').pop(); needed = Math.max(0, needed - 1); progress(); };
+window.SetStatusChanged = s => { $('file').textContent = s; };
+
+// Start: ?theme=suess erzwingt ein Theme, sonst Zufall
+applyTheme(new URLSearchParams(location.search).get('theme'));
+nextTip(); setInterval(nextTip, 7000);
+
+// Vorschau im Browser: Laden simulieren, wenn GMod sich nicht meldet
+setTimeout(() => {
+  if (real) return;
+  details('', '', 'ttt_minecraft_b5', 20, '', 'terrortown', 0.5);
+  SetFilesTotal(309); SetFilesNeeded(309);
+  const fake = ['maps/ttt_minecraft_b5.bsp','materials/ttt2/roles/jester.vmt','sound/weapons/golden_deagle.wav','models/weapons/w_katana.mdl'];
+  let i = 0;
+  const iv = setInterval(() => {
+    DownloadingFile(fake[i++ % fake.length]);
+    if (needed <= 0) { clearInterval(iv); SetStatusChanged('Sende Client-Info…'); }
+  }, 120);
+}, 3000);
+</script>
+</body>
+</html>
