@@ -63,7 +63,7 @@
 <div class="corner tl">MAP<br><strong id="map">wird geladen…</strong></div>
 <div class="corner tr">TEAM<br><strong>TubeYou</strong> <span class="acc">· Owner</span></div>
 <div class="corner bl">
-  <div class="credit" id="credit"></div>
+  <div class="credit" id="credit"></div><div class="credit" id="astate"></div>
 </div>
 <div class="corner br">twitch.tv/<strong>tube_y0u</strong></div>
 
@@ -79,7 +79,7 @@
 </div>
 
 <div id="game"></div>
-<audio id="music" loop></audio>
+<audio id="music" loop autoplay preload="auto"></audio>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -142,7 +142,21 @@ function nextTip() {
   }, 600);
 }
 
-function setPlaying(on) { on ? music.play().catch(() => {}) : music.pause(); }
+// Musik: GMod-Browser blockiert evtl. Autoplay. Darum alle 2 s neu versuchen
+// und den Zustand klein unter dem Credit anzeigen (zur Fehlersuche).
+let audioState = 'startet…';
+function setPlaying(on) {
+  if (!on) return music.pause();
+  const p = music.play();
+  if (p && p.then) p.then(() => audioState = 'läuft').catch(e => audioState = 'blockiert (' + e.name + ')');
+}
+music.addEventListener('error', () => audioState = 'Fehler beim Laden (' + (music.error && music.error.code) + ')');
+music.addEventListener('playing', () => audioState = 'läuft');
+music.volume = 0.3;
+setInterval(() => {
+  if (music.paused) setPlaying(true);
+  $('astate').textContent = '♪ ' + audioState;
+}, 2000);
 
 function spawn() {
   const pool = theme.good.concat(theme.bad);
