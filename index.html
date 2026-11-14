@@ -14,6 +14,8 @@
   body.suess       { --bg:linear-gradient(160deg,#ffe3f1,#fff5e6 60%,#e6f4ff); --fg:#5a3550; --dim:#b18aa6; --acc:#ff6fae; --font:"Segoe UI",Arial,sans-serif; --title:"Segoe UI Black","Arial Rounded MT Bold",sans-serif; }
   body.weltraum    { --bg:radial-gradient(ellipse at 70% 20%,#2b1559,#0b0820 50%,#03020a); --fg:#e3dcff; --dim:#8a80b8; --acc:#41f2ff; --font:Consolas,"Segoe UI",monospace; --title:"Segoe UI Black",Arial,sans-serif; }
   body.weihnachten { --bg:radial-gradient(ellipse at 50% 30%,#14402a,#0a2416 60%,#04120a); --fg:#f4efe6; --dim:#9fb8a6; --acc:#e0303a; --font:"Segoe UI",Arial,sans-serif; --title:"Segoe UI Black",Arial,sans-serif; }
+  body.winternacht { --bg:radial-gradient(ellipse at 50% 20%,#1b2c4a,#0a1426 60%,#02060e); --fg:#e8f0ff; --dim:#8aa0c4; --acc:#9fd4ff; --font:"Segoe UI",Arial,sans-serif; --title:"Segoe UI Black",Arial,sans-serif; }
+  body.lebkuchen { --bg:radial-gradient(ellipse at 50% 30%,#5a3418,#3a1f0c 60%,#1c0e05); --fg:#fff3df; --dim:#d9b48a; --acc:#ffcf5a; --font:Georgia,serif; --title:Georgia,serif; }
   body.mittelalter { --bg:radial-gradient(ellipse,#e9d8b0,#c9ab72 70%,#7a5a2c); --fg:#3a2510; --dim:#7a5a33; --acc:#8b1a1a; --font:Georgia,serif; --title:"Old English Text MT",Georgia,serif; }
 
   /* Deko je Theme */
@@ -21,6 +23,9 @@
   .gruselig .deco { background:radial-gradient(circle at 20% 70%,#3a2a2a55,transparent 35%),radial-gradient(circle at 80% 30%,#2a1a1a55,transparent 30%); filter:blur(30px); animation:drift 30s ease-in-out infinite alternate; }
   .weltraum .deco { background-image:radial-gradient(1px 1px at 10% 20%,#fff,transparent),radial-gradient(1px 1px at 30% 80%,#fff,transparent),radial-gradient(2px 2px at 60% 40%,#fff,transparent),radial-gradient(1px 1px at 85% 65%,#fff,transparent),radial-gradient(1px 1px at 45% 15%,#fff,transparent),radial-gradient(2px 2px at 75% 90%,#fff,transparent); background-size:300px 300px; animation:drift 60s linear infinite; }
   .weihnachten .deco { background-image:radial-gradient(3px 3px at 10% 10%,#fff,transparent),radial-gradient(2px 2px at 40% 30%,#fff,transparent),radial-gradient(3px 3px at 70% 5%,#fff,transparent),radial-gradient(2px 2px at 90% 45%,#fff,transparent),radial-gradient(2px 2px at 25% 60%,#fff,transparent); background-size:260px 260px; animation:snow 12s linear infinite; }
+  .winternacht .deco, .lebkuchen .deco { background-image:radial-gradient(3px 3px at 10% 10%,#fff,transparent),radial-gradient(2px 2px at 40% 30%,#fff,transparent),radial-gradient(3px 3px at 70% 5%,#fff,transparent),radial-gradient(2px 2px at 90% 45%,#fff,transparent),radial-gradient(2px 2px at 25% 60%,#fff,transparent); background-size:260px 260px; animation:snow 14s linear infinite; }
+  .winternacht h1 span { text-shadow:0 0 24px #9fd4ffaa; }
+  .lebkuchen h1 span { text-shadow:0 0 18px #ffcf5a88; }
   .weihnachten h1 span { text-shadow:0 0 18px #e0303a88; }
   @keyframes snow { to { background-position:40px 260px; } }
   @keyframes drift { to { transform:translate(5%,-5%); } }
@@ -63,7 +68,7 @@
 <div class="corner tl">MAP<br><strong id="map">wird geladen…</strong></div>
 <div class="corner tr">TEAM<br><strong>TubeYou</strong> <span class="acc">· Owner</span></div>
 <div class="corner bl">
-  <div class="credit" id="credit"></div><div class="credit" id="astate"></div>
+  <div class="credit" id="credit"></div>
 </div>
 <div class="corner br">twitch.tv/<strong>tube_y0u</strong></div>
 
@@ -88,6 +93,18 @@ const music = $('music');
 const MP3 = n => 'music/' + n + '.ogg';
 
 // Ein Theme = Farben (CSS) + Text + Musik + Spiel. Neues Theme: Eintrag hier + Klasse im CSS.
+const XMAS = [['We Wish you a Merry Christmas','we-wish-you'],['Oh, Christmas Tree','oh-xmas'],['It Came Upon a Midnight Clear','midnight-clear']];
+
+// Weihnachtszeit: 1. Advent (4. Sonntag vor dem 25.12.) bis einschliesslich 6. Januar.
+// Dann kommen nur noch Weihnachts-Themes, sonst nie.
+function isChristmas(d) {
+  d = d || new Date();
+  if (d.getMonth() === 0) return d.getDate() <= 6;
+  const xmas = new Date(d.getFullYear(), 11, 25);
+  const back = xmas.getDay() === 0 ? 7 : xmas.getDay();
+  return d >= new Date(d.getFullYear(), 11, 25 - back - 21);
+}
+
 const THEMES = {
   gruselig: { tracks:[['Magic Escape Room','magic-escape-room']], tag:'Die Traitor sind immer die anderen.',
     good:['🔪','🩸','💀'], bad:['😇'],
@@ -104,10 +121,16 @@ const THEMES = {
   mittelalter: { tracks:[['The Britons','the-britons']], tag:'Verrat, so alt wie die Krone selbst.',
     good:['🐉','🦇','🐺'], bad:['👑'],
     tips:[['ERLASS','Wer den König erschlägt, wird gehängt. Oder gekickt.']] },
-  weihnachten: { tracks:[['We Wish you a Merry Christmas','we-wish-you'],['Oh, Christmas Tree','oh-xmas'],['It Came Upon a Midnight Clear','midnight-clear']],
+  weihnachten: { tracks:XMAS,
     tag:'Frohe Weihnachten. Einer von euch ist der Grinch.',
     good:['🎁','⭐','🍪'], bad:['🎅'],
-    tips:[['BESCHERUNG','Der Weihnachtsmann ist kein Traitor. Glaub ich.']] }
+    tips:[['BESCHERUNG','Der Weihnachtsmann ist kein Traitor. Glaub ich.']], xmas:true },
+  winternacht: { tracks:XMAS, tag:'Stille Nacht. Tödliche Nacht.',
+    good:['❄️','⛄','🕯️'], bad:['👼'],
+    tips:[['WINTERNACHT','Im Schnee sieht man Fußspuren. Leider nicht in GMod.']], xmas:true },
+  lebkuchen: { tracks:XMAS, tag:'Süßer die Glocken nie klingen. Lauter die Schüsse auch nicht.',
+    good:['🍪','🔔','🎄'], bad:['🦌'],
+    tips:[['PLÄTZCHEN','Wer Lebkuchen verteilt, ist verdächtig nett.']], xmas:true }
 };
 const BASE_TIPS = [
   ['REGEL','Kein RDM. Wer grundlos Unschuldige tötet, verliert Karma und Schaden.'],
@@ -118,8 +141,8 @@ const BASE_TIPS = [
 
 let theme, tips = [], t = 0;
 function applyTheme(name) {
-  const keys = Object.keys(THEMES);
-  if (!THEMES[name] && new Date().getMonth() === 11 && Math.random() < 0.5) name = 'weihnachten';
+  const xmasNow = isChristmas();
+  const keys = Object.keys(THEMES).filter(k => !!THEMES[k].xmas === xmasNow);
   name = THEMES[name] ? name : keys[Math.floor(Math.random() * keys.length)];
   theme = THEMES[name];
   const tr = theme.tracks[Math.floor(Math.random() * theme.tracks.length)];
@@ -155,7 +178,6 @@ music.addEventListener('playing', () => audioState = 'läuft');
 music.volume = 0.3;
 setInterval(() => {
   if (music.paused) setPlaying(true);
-  $('astate').textContent = '♪ ' + audioState;
 }, 2000);
 
 function spawn() {
